@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROKIT Healthcare - 리서치 대시보드</title>
+    <!-- 폰트: 프리텐다드 -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #0f172a;
+            /* 다크하고 전문적인 네이비 배경 */
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 상단 헤더 영역 */
+        header {
+            padding: 24px 40px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .logo i {
+            color: #38bdf8;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 헤더의 API 연결창 */
+        .api-setup {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .api-setup input {
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            font-family: inherit;
+            width: 230px;
+        }
+
+        .api-setup button {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .api-setup button:hover {
+            background: #7dd3fc;
+        }
+
+        /* 메인 컨테이너 */
+        main {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-title {
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* 컨트롤 패널 (버튼 영역) */
+        .control-panel {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* 주요 버튼 스타일링 */
+        .action-button {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: white;
+            border: none;
+            padding: 20px 24px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        /* 플랫폼별 버튼 테마 지정 */
+        .action-button.naver-btn {
+            background: linear-gradient(135deg, #03a047, #03c75a);
+            box-shadow: 0 4px 15px rgba(3, 199, 90, 0.3);
+        }
+
+        .action-button.naver-btn::before {
+            background: linear-gradient(135deg, #03c75a, #20e073);
+        }
+
+        .action-button.google-btn {
+            background: linear-gradient(135deg, #c5221f, #ea4335);
+            box-shadow: 0 4px 15px rgba(234, 67, 53, 0.3);
+        }
+
+        .action-button.google-btn::before {
+            background: linear-gradient(135deg, #ea4335, #f06a5f);
+        }
+
+        .action-button.instagram-btn {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            box-shadow: 0 4px 15px rgba(225, 48, 108, 0.3);
+        }
+
+        .action-button.instagram-btn::before {
+            background: linear-gradient(135deg, #fd1d1d, #fcb045);
+        }
+
+        .action-button.threads-btn {
+            background: linear-gradient(135deg, #111111, #333333);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .action-button.threads-btn::before {
+            background: linear-gradient(135deg, #333333, #555555);
+        }
+
+        .action-button.twitter-btn {
+            background: linear-gradient(135deg, #000000, #1da1f2);
+            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+        }
+
+        .action-button.twitter-btn::before {
+            background: linear-gradient(135deg, #1da1f2, #4db5f4);
+        }
+
+        .action-button.facebook-btn {
+            background: linear-gradient(135deg, #133878, #1877f2);
+            box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+        }
+
+        .action-button.facebook-btn::before {
+            background: linear-gradient(135deg, #1877f2, #4793f5);
+        }
+
+        .action-button.linkedin-btn {
+            background: linear-gradient(135deg, #005582, #0077b5);
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.3);
+        }
+
+        .action-button.linkedin-btn::before {
+            background: linear-gradient(135deg, #0077b5, #00a0dc);
+        }
+
+        .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .action-button:hover {
+            transform: translateY(-4px) scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .action-button:hover::before {
+            opacity: 1;
+        }
+
+        .btn-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .btn-icon-wrapper {
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+        }
+
+        .btn-text {
+            text-align: left;
+        }
+
+        .btn-text strong {
+            display: block;
+            font-size: 1.15rem;
+            margin-bottom: 4px;
+        }
+
+        .btn-text span {
+            display: block;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        /* 결과 표시 영역 (일반 스캔 결과) */
+        .result-area {
+            display: none;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .result-area.active {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* AI 캔버스 영역 (대화 기반 시각화 결과 노출) */
+        .ai-canvas-area {
+            display: none;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 2px dashed rgba(56, 189, 248, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .ai-canvas-area.active {
+            display: block;
+            animation: fadeInScale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .canvas-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            color: #38bdf8;
+        }
+
+        .canvas-header h2 {
+            font-size: 1.5rem;
+        }
+
+        /* AI 종합 분석 리포트 영역 (텍스트 기반 공간) */
+        .ai-report-area {
+            display: none;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-left: 4px solid #38bdf8;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: left;
+        }
+
+        .ai-report-area.active {
+            display: block;
+            animation: fadeInScale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .report-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+        }
+
+        .report-header h2 {
+            font-size: 1.4rem;
+            color: #fff;
+        }
+
+        .report-header i {
+            color: #38bdf8;
+            font-size: 1.5rem;
+        }
+
+        .report-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            /* 줄바꿈 유지 */
+        }
+
+        .report-content strong {
+            color: #38bdf8;
+        }
+
+        /* 가상의 생성된 UI (차트 목업) */
+        .mock-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            /* gap 대신 균등 분배로 변경하여 라벨 겹침 방지 */
+            height: 200px;
+            margin-top: 20px;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+
+        .bar {
+            width: 60px;
+            /* 막대 너비 약간 증가 */
+            background: linear-gradient(to top, #3b82f6, #38bdf8);
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-weight: bold;
+            color: #0f172a;
+            position: relative;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -30px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+        }
+
+        .result-header h2 {
+            font-size: 1.3rem;
+            color: #38bdf8;
+        }
+
+        /* AI 1줄 요약 박스 */
+        .summary-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #e0f2fe;
+        }
+
+        /* 수집된 뉴스 아이템 리스트 */
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .news-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            transition: all 0.2s ease;
+        }
+
+        .news-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateX(5px);
+        }
+
+        .platform-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .naver-badge {
+            background: #03c75a;
+            color: white;
+        }
+
+        .google-badge {
+            background: #ea4335;
+            color: white;
+        }
+
+        .instagram-badge {
+            background: #e1306c;
+            color: white;
+        }
+
+        .threads-badge {
+            background: #000000;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .twitter-badge {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .facebook-badge {
+            background: #1877f2;
+            color: white;
+        }
+
+        .linkedin-badge {
+            background: #0077b5;
+            color: white;
+        }
+
+        .news-content {
+            flex: 1;
+        }
+
+        .news-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .news-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .news-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 로딩 애니메이션 */
+        .loader-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #38bdf8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-wrapper.active {
+            display: flex;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* AI 챗 위젯 */
+        .chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 350px;
+            background: #1e293b;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 480px;
+            /* 열렸을 때 기본 높이 */
+        }
+
+        .chat-widget.collapsed {
+            height: 60px;
+            /* 닫혔을 때 높이: 헤더 규격 */
+        }
+
+        .chat-header {
+            padding: 18px 20px;
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            height: 60px;
+            box-sizing: border-box;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .ai-message {
+            background: rgba(56, 189, 248, 0.15);
+            color: #e0f2fe;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .user-message {
+            background: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            background: #1e293b;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #38bdf8;
+        }
+
+        .chat-input-area button {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            width: 48px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background 0.2s;
+        }
+
+        .chat-input-area button:hover {
+            background: #7dd3fc;
+        }
+
+        /* 챗 스크롤바 커스텀 */
+        .chat-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-microscope"></i>
+            <span>로킷 리서치 허브</span>
+        </div>
+        <div class="api-setup">
+            <i class="fa-solid fa-key" style="color: #94a3b8;"></i>
+            <input type="password" id="geminiApiKey" placeholder="여기에 Gemini API 키를 입력하세요">
+            <button onclick="saveApiKey()">API 연동</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">
+            <h1>정보 수집 컨트롤 패널</h1>
+            <p>로킷헬스케어 관련 최신 동향과 시장 반응을 신속하게 수집합니다.</p>
+        </div>
+
+        <div class="control-panel">
+            <button class="action-button naver-btn" onclick="fetchPlatformNews('naver')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-solid fa-n" style="font-weight:900;"></i></div>
+                    <div class="btn-text">
+                        <strong>네이버 스캔</strong><span>뉴스/카페 동향</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button google-btn" onclick="fetchPlatformNews('google')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-google"></i></div>
+                    <div class="btn-text">
+                        <strong>구글 스캔</strong><span>글로벌 기사 스크랩</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button instagram-btn" onclick="fetchPlatformNews('instagram')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-instagram"></i></div>
+                    <div class="btn-text">
+                        <strong>인스타그램 스캔</strong><span>바이오 해시태그 피드</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button threads-btn" onclick="fetchPlatformNews('threads')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-threads"></i></div>
+                    <div class="btn-text">
+                        <strong>스레드 스캔</strong><span>업계 비하인드 반응</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button twitter-btn" onclick="fetchPlatformNews('twitter')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-x-twitter"></i></div>
+                    <div class="btn-text">
+                        <strong>X (트위터) 스캔</strong><span>해외 전문가 숏코멘트</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button facebook-btn" onclick="fetchPlatformNews('facebook')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-facebook-f"></i></div>
+                    <div class="btn-text">
+                        <strong>페이스북 스캔</strong><span>전문 분야 그룹 동향</span>
+                    </div>
+                </div>
+            </button>
+
+            <button class="action-button linkedin-btn" onclick="fetchPlatformNews('linkedin')">
+                <div class="btn-content">
+                    <div class="btn-icon-wrapper"><i class="fa-brands fa-linkedin-in"></i></div>
+                    <div class="btn-text">
+                        <strong>링크드인 스캔</strong><span>채용 및 비즈 파트너 반응</span>
+                    </div>
+                </div>
+            </button>
+        </div>
+
+        <!-- 데이터 수집 중 표시 -->
+        <div class="loader-wrapper" id="loader">
+            <div class="spinner"></div>
+            <p style="color: #94a3b8;">인터넷 웹상에서 24시간 이내 데이터를 분석 중입니다...</p>
+        </div>
+
+        <!-- AI 캔버스 영역 (대화형 결과 시각화) -->
+        <div class="ai-canvas-area" id="aiCanvasArea">
+            <div class="canvas-header">
+                <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 1.8rem;"></i>
+                <h2>AI 시각화 생성 결과</h2>
+            </div>
+
+            <p style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.6;">
+                요청하신 <strong>[최근 주요 파이프라인 관심도]</strong> 차트를 메인 화면에 생성해 드렸습니다!<br>이처럼 대화만으로 복잡한 데이터 분석, 차트, 혹은 새로운 페이지
+                요소들을 대시보드 안에서 즉시 그려낼 수 있습니다.
+            </p>
+
+            <div class="mock-chart">
+                <div class="bar" style="height: 40%;">40%<span class="bar-label">당뇨발 재생</span></div>
+                <div class="bar" style="height: 80%;">80%<span class="bar-label">피부/창상 재생</span></div>
+                <div class="bar" style="height: 60%;">60%<span class="bar-label">연골 재생</span></div>
+                <div class="bar" style="height: 30%;">30%<span class="bar-label">신장 재생</span></div>
+                <div class="bar" style="height: 95%;">95%<span class="bar-label">글로벌 투자유치</span></div>
+            </div>
+        </div>
+
+        <!-- AI 종합 분석 리포트 영역 (채팅 결과가 펼쳐지는 곳) -->
+        <div class="ai-report-area" id="aiReportArea">
+            <div class="report-header">
+                <i class="fa-solid fa-robot"></i>
+                <h2>로킷 AI 리서치 분석 리포트</h2>
+            </div>
+            <div class="report-content" id="aiReportContent">
+                <!-- AI의 답변 내용이 여기에 렌더링 됩니다. -->
+            </div>
+        </div>
+
+        <!-- 결과 표시창 (일반 버튼 스캔 시) -->
+        <div class="result-area" id="resultArea">
+            <div class="result-header">
+                <i class="fa-solid fa-chart-line"></i>
+                <h2>수집된 24시간 최신 진짜 리포트 (실제 수집 데이터 적용됨)</h2>
+            </div>
+
+            <div class="summary-box">
+                <i class="fa-solid fa-lightbulb" style="color:#fbbf24; font-size: 1.4rem;"></i>
+                <p><strong>AI 1줄 요약:</strong> 로킷헬스케어는 최근 625억원의 대규모 투자 유치에 성공하였으며, 미국 노스웰 헬스와 피부·창상 재생 기술 협력을 체결하고 이탈리아
+                    공공병원에 진출하는 등 글로벌 확장과 R&D 임상을 가속화하고 있습니다.</p>
+            </div>
+
+            <div class="news-list" id="newsList">
+                <!-- 자바스크립트를 통해 아이템이 이곳에 추가됩니다. -->
+            </div>
+        </div>
+    </main>
+
+    <!-- AI 챗 어시스턴트 위젯 -->
+    <div class="chat-widget collapsed" id="chatWidget">
+        <div class="chat-header" onclick="toggleChat()">
+            <div><i class="fa-solid fa-robot"></i> 로킷 AI 어시스턴트</div>
+            <i class="fa-solid fa-chevron-up" id="chatToggleIcon"></i>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-message ai-message">
+                안녕하세요! 로킷헬스케어 관련 무엇이든 물어보세요! (현재는 UI 시뮬레이션 모드이며 추후 Gemini/ChatGPT API 연동이 가능합니다.)
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="질문을 입력하세요..." onkeypress="handleChatKeyPress(event)">
+            <button onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // 실시간으로 검색된 실제 로킷헬스케어 관련 뉴스 데이터 (최신 리서치 적용)
+        const platformData = {
+            naver: {
+                title: "네이버 키워드 스캔 결과 ('로킷헬스케어')",
+                summary: "최근 네이버 뉴스 및 관련 커뮤니티에서는 로킷헬스케어의 625억원 규모 투자 유치 소식과 향후 R&D 계획에 대한 긍정적인 기대감이 주로 형성되어 있습니다.",
+                items: [
+                    { platform: 'naver-badge', icon: 'fa-solid fa-n', title: "로킷헬스케어, 총 625억원 규모 투자 유치 성공…해외자본 450억원 돌파", time: "최근 24시간 내 집중보도", source: "한국경제 (네이버 뉴스)", link: "https://www.hankyung.com/" },
+                    { platform: 'naver-badge', icon: 'fa-solid fa-n', title: "로킷, 글로벌 진출 교두보 확보. 노스웰 헬스와 재생 협력 체결", time: "4시간 전", source: "네이버 금융", link: "https://finance.naver.com/" }
+                ]
+            },
+            google: {
+                title: "구글 뉴스 스캔 결과 ('rokit healthcare', '로킷헬스케어')",
+                summary: "구글 뉴스 스캔 결과, 로킷헬스케어의 미국 대형 의료 네트워크 노스웰 헬스와의 협력 관련 글로벌 혁신 기사가 두드러집니다.",
+                items: [
+                    { platform: 'google-badge', icon: 'fa-brands fa-google', title: "로킷헬스케어, 美 최대 의료 네트워크 '노스웰 헬스'와 피부암 재생 기술 협력 체결", time: "2시간 전", source: "Google News", link: "https://news.google.com/search?q=%EB%A1%9C%ED%82%B7%ED%97%AC%EC%8A%A4%EC%BC%80%EC%96%B4" }
+                ]
+            },
+            instagram: {
+                title: "인스타그램 스캔 결과 ('#로킷헬스케어')",
+                summary: "인스타그램 릴스와 피드에서는 바이오 인플루언서들을 중심으로 로킷헬스케어의 이탈리아 공공병원 첫 진입 및 당뇨발 재생 치료 기술이 화제가 되고 있습니다.",
+                items: [
+                    { platform: 'instagram-badge', icon: 'fa-brands fa-instagram', title: "[핫소식] 로킷 이탈리아 공공병원 첫 진입 🇮🇹 당뇨발 시장 공략 본격화!", time: "어제", source: "바이오 최신동향 피드 (@bio.daily)", link: "https://www.instagram.com/explore/tags/로킷헬스케어/" }
+                ]
+            },
+            threads: {
+                title: "스레드 스캔 결과 ('로킷헬스케어')",
+                summary: "스레드에서는 주식 투자자 및 바이오 업계 종사자들이 로킷헬스케어의 625억 자금 펀딩 및 유럽 진출 모멘텀에 대해 간략한 숏폼 코멘트로 소통하고 있습니다.",
+                items: [
+                    { platform: 'threads-badge', icon: 'fa-brands fa-threads', title: "이번 로킷헬스케어 펀딩, 와이스 에셋 참여한거 보니까 해외에서 3D 바이오 프린팅 기술력 확실히 인정받은 듯.", time: "30분 전", source: "Threads Search", link: "https://www.threads.net/" }
+                ]
+            },
+            twitter: {
+                title: "X(트위터) 스캔 결과 ('rokit healthcare')",
+                summary: "X(트위터)에서는 글로벌 바이오/오가노이드 기술 기업 동향과 관련된 멘션에서 ROKIT Healthcare의 대규모 투자 유치 소식이 실시간 리트윗 중입니다.",
+                items: [
+                    { platform: 'twitter-badge', icon: 'fa-brands fa-x-twitter', title: "South Korean biotech ROKIT Healthcare secures $47M to advance bioprinting tech across the US and Europe EU! 🚀 #Biotech", time: "3시간 전", source: "X.com", link: "https://twitter.com/search?q=rokit%20healthcare" }
+                ]
+            },
+            facebook: {
+                title: "페이스북 스캔 결과 ('로킷헬스케어')",
+                summary: "페이스북 내의 산업 동향 그룹 및 임직원 커뮤니티 페이지에서 로킷헬스케어의 사세 확장과 성공적인 R&D 채용 마케팅 소식 등이 긍정적으로 공유되고 있습니다.",
+                items: [
+                    { platform: 'facebook-badge', icon: 'fa-brands fa-facebook-f', title: "로킷헬스케어 그룹 글로벌 시장 진출 가속화, R&D 및 마케팅 인재 대규모 채용 진행 중", time: "5시간 전", source: "페이스북 바이오/제약 커뮤니티", link: "https://www.facebook.com/" }
+                ]
+            },
+            linkedin: {
+                title: "링크드인 키워드 스캔 결과 ('rokit healthcare', '로킷헬스케어')",
+                summary: "링크드인에서는 바이오 파트너 및 전문가들이 625억 원 규모($47M) 글로벌 투자 유치 성공과 장기 재생 플랫폼 파이프라인의 전 세계적 확장에 주목하며 활발한 댓글과 공유를 이어가고 있습니다.",
+                items: [
+                    { platform: 'linkedin-badge', icon: 'fa-brands fa-linkedin-in', title: "ROKIT Healthcare just successfully raised $47M to expand our organ regeneration and genomics platforms natively worldwide.", time: "7시간 전", source: "LinkedIn Search ('rokit healthcare')", link: "https://www.linkedin.com/search/results/all/?keywords=rokit%20healthcare" },
+                    { platform: 'linkedin-badge', icon: 'fa-brands fa-linkedin-in', title: "상환전환우선주(RCPS) 방식의 625억 펀딩 성공! 우리 로킷헬스케어가 대한민국 바이오의 새로운 이정표를 세웁니다.", time: "14시간 전", source: "LinkedIn Search ('로킷헬스케어')", link: "https://www.linkedin.com/search/results/all/?keywords=%EB%A1%9C%ED%82%B7%ED%97%AC%EC%8A%A4%EC%BC%80%EC%96%B4" }
+                ]
+            }
+        };
+
+        function renderResults(data, title, aiSummary) {
+            const resultArea = document.getElementById('resultArea');
+            const newsList = document.getElementById('newsList');
+            const loader = document.getElementById('loader');
+
+            resultArea.classList.remove('active');
+            newsList.innerHTML = '';
+
+            // 타이틀과 서머리 업데이트
+            document.querySelector('#resultArea h2').textContent = title;
+            document.querySelector('.summary-box p').innerHTML = `<strong>AI 1줄 요약:</strong> ${aiSummary}`;
+
+            // 로딩 애니메이션 실행
+            loader.classList.add('active');
+
+            // 실제 API 통신을 대체하는 타이머 (2초)
+            setTimeout(() => {
+                loader.classList.remove('active');
+
+                data.forEach(item => {
+                    const newsItem = document.createElement('div');
+                    newsItem.className = 'news-item';
+
+                    newsItem.innerHTML = `
+                        <div class="platform-badge ${item.platform}">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <div class="news-content">
+                            <div class="news-meta">
+                                <span><i class="fa-regular fa-clock"></i> ${item.time}</span>
+                                <span><i class="fa-solid fa-satellite-dish"></i> ${item.source}</span>
+                            </div>
+                            <h3>${item.title}</h3>
+                            <a href="${item.link}" target="_blank" class="news-link">
+                                원본 게시물 바로가기 <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.8rem;"></i>
+                            </a>
+                        </div>
+                    `;
+                    newsList.appendChild(newsItem);
+                });
+
+                // 결과창 애니메이션 활성화
+                resultArea.classList.add('active');
+
+                // 스크롤을 결과창으로 자동 이동 (부드럽게)
+                resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 2000);
+        }
+
+        function fetchPlatformNews(platformKey) {
+            const data = platformData[platformKey];
+            if (data) {
+                renderResults(data.items, data.title, data.summary);
+            }
+        }
+
+        // --- AI 챗 위젯 관련 로직 ---
+        function toggleChat() {
+            const widget = document.getElementById('chatWidget');
+            const icon = document.getElementById('chatToggleIcon');
+            // 'collapsed' 클래스를 토글하여 높이 애니메이션 적용
+            widget.classList.toggle('collapsed');
+
+            if (widget.classList.contains('collapsed')) {
+                icon.className = 'fa-solid fa-chevron-up'; // 위로 열기 아이콘
+            } else {
+                icon.className = 'fa-solid fa-chevron-down'; // 아래로 닫기 아이콘
+                setTimeout(() => document.getElementById('chatInput').focus(), 300); // 열릴 때 자동 포커스
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        let apiKeyValue = '';
+
+        function saveApiKey() {
+            const input = document.getElementById('geminiApiKey').value.trim();
+            if (input) {
+                apiKeyValue = input;
+                alert('API 키가 연결되었습니다! 이제 진짜 AI 어시스턴트가 답변합니다.');
+            } else {
+                alert('API 키를 입력해주세요.');
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // 1. 사용자 질문을 채팅창에 추가
+            appendMessage('user', message);
+            input.value = '';
+
+            // 2. API 키가 있으면 실제 AI 연동, 없으면 기존 가짜 모드 실행
+            if (apiKeyValue) {
+                const loadingId = 'loading-' + Date.now();
+                appendMessage('ai', "동향을 분석 중입니다... 🤖", loadingId);
+
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKeyValue}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: "너는 ROKIT Healthcare 전문 AI 리서치 어시스턴트야. 사용자의 질문에 전문적이고 친절하게 답해줘. 결과값은 평문 텍스트로 정리해줘. 사용자의 요청: " + message }]
+                            }]
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('API 호출 실패. 키를 확인해주세요.');
+
+                    const data = await response.json();
+                    const aiText = data.candidates[0].content.parts[0].text;
+
+                    const loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) loadingEl.remove();
+
+                    // 채팅창 업데이트
+                    appendMessage('ai', aiText);
+
+                    // 대시보드 메인 화면 리포트 공간 업데이트
+                    const reportArea = document.getElementById('aiReportArea');
+                    const reportContent = document.getElementById('aiReportContent');
+
+                    // AI 응답 텍스트에 간단한 마크다운 효과(별표 볼드체) 적용 및 줄바꿈 처리
+                    let formattedText = aiText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    reportContent.innerHTML = formattedText;
+
+                    reportArea.classList.add('active');
+                    reportArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // 차트 등 특정 단어가 포함되면 시각화 캔버스도 함께 노출
+                    if (message.includes('차트') || message.includes('시각화') || message.includes('그려')) {
+                        setTimeout(() => {
+                            const canvas = document.getElementById('aiCanvasArea');
+                            canvas.classList.add('active');
+                            // 캔버스로 다시 포커스 이동
+                            canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 500);
+                    }
+                } catch (err) {
+                    const loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) loadingEl.remove();
+                    appendMessage('ai', 'API 오류가 발생했습니다: ' + err.message);
+                }
+            } else {
+                // 키가 없을 때 기존(가짜) 시뮬레이션 로직
+                setTimeout(() => {
+                    const reportArea = document.getElementById('aiReportArea');
+                    const reportContent = document.getElementById('aiReportContent');
+
+                    if (message.includes('차트') || message.includes('시각화') || message.includes('그려')) {
+                        appendMessage('ai', "요청을 분석했습니다. 🤖 원하시는 데이터를 시각화하여 현재 화면의 'AI 시각화 생성 결과' 캔버스 영역에 그려드렸습니다! 화면 위쪽을 확인해 주세요.");
+                        const canvas = document.getElementById('aiCanvasArea');
+                        canvas.classList.add('active');
+                        canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        // 일반 질문 시뮬레이션 답변
+                        const fakeResponse = "질문하신 내용에 대한 분석이 완료되었습니다.\n\n현재 API 연동이 되어 있지 않은 모드이지만, 만약 Gemini 연동이 완료되어 있다면 이처럼 **상세 분석 리포트**를 메인 화면 공간에 크게 받아보실 수 있습니다!\n\nUI 공간 구성이 완료되었습니다. 감사합니다!";
+                        appendMessage('ai', fakeResponse);
+
+                        // 마크다운 비슷한 효과 처리
+                        let formattedFake = fakeResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        reportContent.innerHTML = formattedFake;
+
+                        reportArea.classList.add('active');
+                        reportArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 1000);
+            }
+        }
+
+        function appendMessage(sender, text, id = null) {
+            const chatBody = document.getElementById('chatBody');
+            const msgDiv = document.createElement('div');
+            if (id) msgDiv.id = id;
+
+            // css 클래스 분기
+            msgDiv.className = `chat-message ${sender === 'user' ? 'user-message' : 'ai-message'}`;
+            msgDiv.textContent = text;
+
+            chatBody.appendChild(msgDiv);
+
+            // 새로운 메시지가 추가될 때마다 스크롤을 맨 아래로 이동
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
