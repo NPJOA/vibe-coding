@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ROKIT Healthcare - 내 첫번째 아이디어</title>
     <!-- 폰트: 프리텐다드 사용 -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -16,7 +18,7 @@
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
             /* 신뢰를 주는 파란색(Trust Blue) 그라데이션 배경 */
-            background: linear-gradient(135deg, #0a2342, #004d99, #007bff); 
+            background: linear-gradient(135deg, #0a2342, #004d99, #007bff);
             color: #ffffff;
             height: 100vh;
             display: flex;
@@ -30,19 +32,19 @@
             position: absolute;
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
             top: -100px;
             left: -100px;
             border-radius: 50%;
             z-index: 0;
             pointer-events: none;
         }
-        
+
         .bg-glow-2 {
             position: absolute;
             width: 800px;
             height: 800px;
-            background: radial-gradient(circle, rgba(0, 195, 255, 0.15) 0%, rgba(255,255,255,0) 70%);
+            background: radial-gradient(circle, rgba(0, 195, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
             bottom: -200px;
             right: -200px;
             border-radius: 50%;
@@ -79,7 +81,8 @@
             display: block;
             width: 24px;
             height: 24px;
-            background: #00d2ff; /* 밝은 하늘색 포인트 */
+            background: #00d2ff;
+            /* 밝은 하늘색 포인트 */
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 10px 0 0 rgba(255, 255, 255, 0.9);
         }
@@ -91,7 +94,7 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.8);
         }
-        
+
         .nav-links span:hover {
             color: #ffffff;
             cursor: pointer;
@@ -115,21 +118,36 @@
             animation: fadeInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             padding: 60px 80px;
             border-radius: 24px;
-            /* 신뢰감 있는 푸른빛의 글래스모피즘 */
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-top: 1px solid rgba(255, 255, 255, 0.4);
-            border-left: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            /* 3D 반투명 아크릴(Acrylic) 효과 */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            /* 두께감을 주는 디테일 테두리 */
+            border-top: 1.5px solid rgba(255, 255, 255, 0.5);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.3);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            /* 입체감과 빛 반사(Specular) 처리 */
+            box-shadow:
+                inset 2px 2px 10px rgba(255, 255, 255, 0.3),
+                /* 내부 상단 빛 반사 */
+                inset -2px -2px 15px rgba(0, 0, 0, 0.1),
+                /* 내부 하단 어구움 */
+                0 30px 60px rgba(0, 0, 0, 0.3),
+                /* 전체 깊은 외부 그림자 */
+                0 0 40px rgba(0, 195, 255, 0.15);
+            /* 은은한 백라이트 주변광 효과 */
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-8px) scale(1.02) perspective(1000px) rotateX(2deg);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            box-shadow:
+                inset 2px 2px 15px rgba(255, 255, 255, 0.4),
+                inset -2px -2px 15px rgba(0, 0, 0, 0.15),
+                0 40px 80px rgba(0, 0, 0, 0.4),
+                0 0 60px rgba(0, 195, 255, 0.25);
         }
 
         .subtitle {
@@ -187,6 +205,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             100% {
                 opacity: 1;
                 transform: translateY(0);
@@ -208,22 +227,27 @@
             header {
                 padding: 16px 24px;
             }
+
             .nav-links {
                 display: none;
             }
+
             h1 {
                 font-size: 2.5rem;
             }
+
             .container {
                 padding: 40px 20px;
                 margin: 0 20px;
             }
+
             .description {
                 font-size: 1rem;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="bg-glow"></div>
     <div class="bg-glow-2"></div>
@@ -241,12 +265,13 @@
     <main>
         <div class="container">
             <div class="subtitle">Next Generation Healthcare</div>
-            <h1>내 첫번째 아이디어</h1>
+            <h1>npjoa 어서오세요</h1>
             <p class="description">생명공학과 3D 바이오프린팅 기술을 통해<br>새로운 미래 의료 혁신을 시작합니다.</p>
-            <button class="btn">자세히 보기</button>
+            <a href="https://blog.naver.com/npjoa" target="_blank" class="btn">엔팔좋아 블로그 바로가기</a>
         </div>
     </main>
-    
+
     <div class="bottom-line"></div>
 </body>
+
 </html>
