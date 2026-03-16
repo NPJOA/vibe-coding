@@ -17,13 +17,14 @@
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
-            /* 신뢰를 주는 파란색(Trust Blue) 그라데이션 배경 */
-            background: linear-gradient(135deg, #0a2342, #004d99, #007bff);
+            /* 블랙 & 다크 그레이 그라데이션 */
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
             color: #ffffff;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -32,7 +33,7 @@
             position: absolute;
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+            background: radial-gradient(circle, rgba(0, 255, 127, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
             top: -100px;
             left: -100px;
             border-radius: 50%;
@@ -44,7 +45,7 @@
             position: absolute;
             width: 800px;
             height: 800px;
-            background: radial-gradient(circle, rgba(0, 195, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            background: radial-gradient(circle, rgba(0, 255, 127, 0.08) 0%, rgba(0, 0, 0, 0) 70%);
             bottom: -200px;
             right: -200px;
             border-radius: 50%;
@@ -79,12 +80,12 @@
         .logo::before {
             content: '';
             display: block;
-            width: 24px;
-            height: 24px;
-            background: #00d2ff;
-            /* 밝은 하늘색 포인트 */
+            width: 12px;
+            height: 12px;
+            background: #00ff7f;
+            /* 네온 그린 */
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 10px 0 0 rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 15px #00ff7f;
         }
 
         .nav-links {
@@ -105,10 +106,12 @@
         main {
             flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            padding: 20px;
+            padding: 80px 20px;
+            gap: 40px;
         }
 
         .container {
@@ -118,42 +121,30 @@
             animation: fadeInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
             padding: 60px 80px;
             border-radius: 24px;
-            /* 3D 반투명 아크릴(Acrylic) 효과 */
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+            /* 다크 그레이 글래스모피즘 */
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            /* 두께감을 주는 디테일 테두리 */
-            border-top: 1.5px solid rgba(255, 255, 255, 0.5);
-            border-left: 1.5px solid rgba(255, 255, 255, 0.3);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            /* 입체감과 빛 반사(Specular) 처리 */
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow:
-                inset 2px 2px 10px rgba(255, 255, 255, 0.3),
-                /* 내부 상단 빛 반사 */
-                inset -2px -2px 15px rgba(0, 0, 0, 0.1),
-                /* 내부 하단 어구움 */
-                0 30px 60px rgba(0, 0, 0, 0.3),
-                /* 전체 깊은 외부 그림자 */
-                0 0 40px rgba(0, 195, 255, 0.15);
-            /* 은은한 백라이트 주변광 효과 */
+                0 40px 100px rgba(0, 0, 0, 0.5),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
             transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .container:hover {
-            transform: translateY(-8px) scale(1.02) perspective(1000px) rotateX(2deg);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            transform: translateY(-8px);
+            border: 1px solid rgba(0, 255, 127, 0.3);
             box-shadow:
-                inset 2px 2px 15px rgba(255, 255, 255, 0.4),
-                inset -2px -2px 15px rgba(0, 0, 0, 0.15),
-                0 40px 80px rgba(0, 0, 0, 0.4),
-                0 0 60px rgba(0, 195, 255, 0.25);
+                0 50px 120px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(0, 255, 127, 0.1);
         }
 
         .subtitle {
             font-size: 1.1rem;
             font-weight: 500;
-            color: #00d2ff;
+            color: #00ff7f;
+            /* 네온 그린 */
             margin-bottom: 16px;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -172,11 +163,13 @@
         .description {
             font-size: 1.2rem;
             font-weight: 400;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.7);
             max-width: 500px;
             margin: 0 auto 32px;
             line-height: 1.6;
         }
+
+
 
         /* 혁신적인 느낌의 버튼 */
         .btn {
@@ -184,20 +177,28 @@
             padding: 16px 40px;
             font-size: 1.1rem;
             font-weight: 600;
-            color: #004d99;
-            background: #ffffff;
+            color: #000000;
+            background: #00ff7f;
+            /* 네온 그린 */
             border-radius: 50px;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 15px rgba(0, 255, 127, 0.2);
             border: none;
             cursor: pointer;
         }
 
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         .btn:hover {
-            background: #f0f8ff;
+            background: #00e672;
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 25px rgba(0, 255, 127, 0.3);
         }
 
         @keyframes fadeInUp {
@@ -219,7 +220,7 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, #00d2ff, #007bff, #0a2342);
+            background: linear-gradient(90deg, #1a1a1a, #00ff7f, #1a1a1a);
             z-index: 10;
         }
 
@@ -253,21 +254,29 @@
     <div class="bg-glow-2"></div>
 
     <header>
-        <div class="logo">ROKIT HEALTHCARE</div>
-        <div class="nav-links">
-            <span>회사소개</span>
-            <span>장기재생</span>
-            <span>역노화</span>
-            <span>R&D</span>
-        </div>
+        <div class="logo">NPJOA</div>
+
     </header>
 
     <main>
         <div class="container">
-            <div class="subtitle">Next Generation Healthcare</div>
-            <h1>npjoa 어서오세요</h1>
-            <p class="description">생명공학과 3D 바이오프린팅 기술을 통해<br>새로운 미래 의료 혁신을 시작합니다.</p>
-            <a href="https://blog.naver.com/npjoa" target="_blank" class="btn">엔팔좋아 블로그 바로가기</a>
+            <div class="subtitle">Next Generation Hodler</div>
+            <h1>NPJOA 어서오세요</h1>
+            <p class="description">세상 변화를 추적하고 기록하며 기다릴 줄 아는<br>기업 중심 장기 투자를 지향합니다.</p>
+            <div class="btn-group">
+                <a href="https://x.com/NPjoa_Hodl" target="_blank" class="btn">트위터 바로가기</a>
+                <a href="https://www.youtube.com/@NPjoa" target="_blank" class="btn">유튜브 바로가기</a>
+                <a href="https://blog.naver.com/npjoa" target="_blank" class="btn">블로그 바로가기</a>
+            </div>
+        </div>
+
+        <div class="container" style="animation-delay: 0.2s;">
+            <div class="subtitle">Investment Research</div>
+            <h1>리서치</h1>
+            <p class="description">깊이 있는 분석과 기록을 통해<br>투자의 본질을 탐구합니다.</p>
+            <div class="btn-group">
+                <a href="https://www.notion.so/2eb4f6ef840580cd8531e515865a25f8" target="_blank" class="btn">노션 바로가기</a>
+            </div>
         </div>
     </main>
 
