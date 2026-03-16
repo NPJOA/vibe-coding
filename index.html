@@ -17,7 +17,6 @@
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
-            /* 블랙 & 다크 그레이 그라데이션 */
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
             color: #ffffff;
             min-height: 100vh;
@@ -26,6 +25,55 @@
             overflow-x: hidden;
             overflow-y: auto;
             position: relative;
+        }
+
+        /* 비밀번호 입력 전까지 본문 숨김 */
+        #main-content {
+            display: none;
+        }
+
+        /* 비밀번호 모달 스타일 */
+        #password-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+
+        .auth-container input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 127, 0.5);
+            color: #00ff7f;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            outline: none;
+            width: 100%;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .auth-container button {
+            background: #00ff7f;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
         }
 
         /* 배경 장식 요소 (바이오/테크 느낌의 미세한 패턴/빛) */
@@ -265,15 +313,27 @@
 </head>
 
 <body>
-    <div class="bg-glow"></div>
-    <div class="bg-glow-2"></div>
+    <!-- 비밀번호 모달 -->
+    <div id="password-modal">
+        <div class="auth-container">
+            <div class="subtitle">Access Required</div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 20px;">NPJOA Private Hub</h1>
+            <input type="password" id="password-input" placeholder="비밀번호를 입력하세요..." onkeypress="if(event.keyCode==13) checkPassword()">
+            <button onclick="checkPassword()">연결하기</button>
+            <p id="error-msg" style="color: #ff4d4d; margin-top: 15px; font-size: 0.9rem; display: none;">비밀번호가 틀렸습니다.</p>
+        </div>
+    </div>
 
-    <header>
-        <div class="logo">NPJOA</div>
+    <!-- 실제 본문 컨텐츠 (id="main-content") -->
+    <div id="main-content">
+        <div class="bg-glow"></div>
+        <div class="bg-glow-2"></div>
 
-    </header>
+        <header>
+            <div class="logo">NPJOA</div>
+        </header>
 
-    <main>
+        <main>
         <div class="container">
             <div class="subtitle">Next Generation Hodler</div>
             <h1>NPJOA 어서오세요</h1>
@@ -349,6 +409,33 @@
     </main>
 
     <div class="bottom-line"></div>
+    </div> <!-- main-content 닫기 -->
+
+    <script>
+        function checkPassword() {
+            const input = document.getElementById('password-input').value;
+            const correctPass = "NPJOA1113";
+            const modal = document.getElementById('password-modal');
+            const content = document.getElementById('main-content');
+            const error = document.getElementById('error-msg');
+
+            if (input === correctPass) {
+                modal.style.display = 'none';
+                content.style.display = 'block';
+                // 바디 오버플로우 초기화 (스크롤 가능하게)
+                document.body.style.overflowY = 'auto';
+            } else {
+                error.style.display = 'block';
+                document.getElementById('password-input').value = "";
+            }
+        }
+
+        // 페이지 로드 시 스크롤 잠금 (비밀번호 입력 전)
+        window.onload = function() {
+            document.body.style.overflowY = 'hidden';
+            document.getElementById('password-input').focus();
+        };
+    </script>
 </body>
 
 </html>
