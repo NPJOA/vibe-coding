@@ -488,19 +488,27 @@
     <script>
         function checkPassword() {
             const input = document.getElementById('password-input').value;
-            const correctPass = "NPJOA1113";
+            const adminPass = "j8078j";
+            const guestPass = "NPJOA1113";
             const modal = document.getElementById('password-modal');
             const content = document.getElementById('main-content');
             const error = document.getElementById('error-msg');
 
-            if (input === correctPass) {
+            if (input === adminPass) {
+                // 주인장 모드
                 modal.style.display = 'none';
                 content.style.display = 'block';
-                // 관리자 에디터 활성화
                 document.getElementById('admin-editor').style.display = 'block';
-                // 삭제 버튼 모두 표시
-                document.querySelectorAll('.btn-delete').forEach(el => el.style.display = 'block');
-                
+                localStorage.setItem('auth_type', 'admin');
+                renderLogs();
+                document.body.style.overflowY = 'auto';
+            } else if (input === guestPass) {
+                // 방문자 모드
+                modal.style.display = 'none';
+                content.style.display = 'block';
+                document.getElementById('admin-editor').style.display = 'none';
+                localStorage.setItem('auth_type', 'guest');
+                renderLogs();
                 document.body.style.overflowY = 'auto';
             } else {
                 error.style.display = 'block';
@@ -541,13 +549,14 @@
 
         function renderLogs() {
             const list = document.getElementById('log-list');
-            const isAdmin = document.getElementById('password-modal').style.display === 'none';
+            const authType = localStorage.getItem('auth_type');
+            const isAdmin = authType === 'admin';
             
             list.innerHTML = logs.map(log => `
                 <div class="log-item">
                     <div class="log-date">${log.date}</div>
                     <div class="log-content">${log.text}</div>
-                    <div class="btn-delete" onclick="deleteLog(${log.id})" style="display: ${isAdmin ? 'block' : 'none'}">삭제</div>
+                    ${isAdmin ? `<div class="btn-delete" onclick="deleteLog(${log.id})" style="display: block">삭제</div>` : ''}
                 </div>
             `).join('');
         }
