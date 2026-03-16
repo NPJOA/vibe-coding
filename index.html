@@ -264,6 +264,68 @@
             letter-spacing: 0.05em;
         }
 
+        /* 로그/피드 스타일 */
+        .log-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .log-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00ff7f;
+            position: relative;
+        }
+
+        .log-date {
+            font-size: 0.75rem;
+            color: #00ff7f;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .log-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: pre-wrap;
+        }
+
+        #admin-editor {
+            display: none; /* 기본적으로 숨김, 비번 인증 성공 시 표시 */
+            width: 100%;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        #admin-editor textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            padding: 15px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        .btn-delete {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: none; /* 관리자만 보이게 설정 */
+        }
+
         @keyframes fadeInUp {
             0% {
                 opacity: 0;
@@ -405,11 +467,17 @@
         </div>
 
         <div class="container" style="animation-delay: 0.6s;">
-            <div class="subtitle">Investment Insights</div>
-            <h1>리서치</h1>
-            <p class="description">새로운 정보와 깊이 있는 분석을 다시 채워나갑니다.</p>
-            <div class="btn-group">
-                <!-- 리서치 관련 링크가 생기면 여기에 추가 -->
+            <div class="subtitle">Manager's Log</div>
+            <h1>공지사항 로그</h1>
+            <p class="description">주인장의 실시간 인사이트와 공지사항을 기록합니다.</p>
+            
+            <div id="log-list" class="log-container">
+                <!-- 로그 아이템이 여기에 추가됨 -->
+            </div>
+
+            <div id="admin-editor">
+                <textarea id="log-input" rows="3" placeholder="기록할 내용을 입력하세요..."></textarea>
+                <button onclick="addLog()" class="btn btn-sm">글 남기기</button>
             </div>
         </div>
     </main>
@@ -428,7 +496,11 @@
             if (input === correctPass) {
                 modal.style.display = 'none';
                 content.style.display = 'block';
-                // 바디 오버플로우 초기화 (스크롤 가능하게)
+                // 관리자 에디터 활성화
+                document.getElementById('admin-editor').style.display = 'block';
+                // 삭제 버튼 모두 표시
+                document.querySelectorAll('.btn-delete').forEach(el => el.style.display = 'block');
+                
                 document.body.style.overflowY = 'auto';
             } else {
                 error.style.display = 'block';
@@ -436,8 +508,53 @@
             }
         }
 
+        // 로그 기능 스크립트
+        let logs = JSON.parse(localStorage.getItem('npjoa_logs') || '[]');
+
+        function saveLogs() {
+            localStorage.setItem('npjoa_logs', JSON.stringify(logs));
+            renderLogs();
+        }
+
+        function addLog() {
+            const content = document.getElementById('log-input').value;
+            if (!content.trim()) return;
+
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            logs.unshift({
+                id: Date.now(),
+                date: dateStr,
+                text: content
+            });
+
+            document.getElementById('log-input').value = "";
+            saveLogs();
+        }
+
+        function deleteLog(id) {
+            if (!confirm('삭제하시겠습니까?')) return;
+            logs = logs.filter(log => log.id !== id);
+            saveLogs();
+        }
+
+        function renderLogs() {
+            const list = document.getElementById('log-list');
+            const isAdmin = document.getElementById('password-modal').style.display === 'none';
+            
+            list.innerHTML = logs.map(log => `
+                <div class="log-item">
+                    <div class="log-date">${log.date}</div>
+                    <div class="log-content">${log.text}</div>
+                    <div class="btn-delete" onclick="deleteLog(${log.id})" style="display: ${isAdmin ? 'block' : 'none'}">삭제</div>
+                </div>
+            `).join('');
+        }
+
         // 페이지 로드 시 스크롤 잠금 (비밀번호 입력 전)
         window.onload = function() {
+            renderLogs(); // 로그 먼저 로드
             document.body.style.overflowY = 'hidden';
             document.getElementById('password-input').focus();
         };
