@@ -35,7 +35,10 @@
         /* 비밀번호 모달 스타일 */
         #password-modal {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: #000;
             display: flex;
             justify-content: center;
@@ -296,7 +299,8 @@
         }
 
         #admin-editor {
-            display: none; /* 기본적으로 숨김, 비번 인증 성공 시 표시 */
+            display: none;
+            /* 기본적으로 숨김, 비번 인증 성공 시 표시 */
             width: 100%;
             margin-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -323,7 +327,8 @@
             color: #ff4d4d;
             cursor: pointer;
             font-size: 0.8rem;
-            display: none; /* 관리자만 보이게 설정 */
+            display: none;
+            /* 관리자만 보이게 설정 */
         }
 
         @keyframes fadeInUp {
@@ -347,6 +352,154 @@
             height: 4px;
             background: linear-gradient(90deg, #1a1a1a, #00ff7f, #1a1a1a);
             z-index: 10;
+        }
+
+        /* 미리보기 창(모달) 스타일 */
+        .preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .preview-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .preview-window {
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 24px;
+            border: 1px solid rgba(0, 255, 127, 0.3);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 127, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .preview-overlay.active .preview-window {
+            transform: scale(1) translateY(0);
+        }
+
+        .preview-header {
+            padding: 24px 32px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-header h2 {
+            font-size: 1.5rem;
+            color: #00ff7f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .preview-header h2::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #00ff7f;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff7f;
+        }
+
+        .close-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .close-preview:hover {
+            background: rgba(255, 48, 48, 0.2);
+            color: #ff4d4d;
+        }
+
+        .preview-body {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .preview-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .preview-content strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .preview-link {
+            margin-top: 32px;
+            display: inline-block;
+            background: rgba(0, 255, 127, 0.15);
+            border: 1px solid rgba(0, 255, 127, 0.4);
+            color: #00ff7f;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .preview-link:hover {
+            background: #00ff7f;
+            color: #000;
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #00ff7f;
+            border-radius: 50%;
+            animation: dotBounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
 
         @media (max-width: 768px) {
@@ -380,9 +533,11 @@
         <div class="auth-container">
             <div class="subtitle">Access Required</div>
             <h1 style="font-size: 1.5rem; margin-bottom: 20px;">NPJOA Private Hub</h1>
-            <input type="password" id="password-input" placeholder="비밀번호를 입력하세요..." onkeypress="if(event.keyCode==13) checkPassword()">
+            <input type="password" id="password-input" placeholder="비밀번호를 입력하세요..."
+                onkeypress="if(event.keyCode==13) checkPassword()">
             <button onclick="checkPassword()">연결하기</button>
-            <p id="error-msg" style="color: #ff4d4d; margin-top: 15px; font-size: 0.9rem; display: none;">비밀번호가 틀렸습니다.</p>
+            <p id="error-msg" style="color: #ff4d4d; margin-top: 15px; font-size: 0.9rem; display: none;">비밀번호가 틀렸습니다.
+            </p>
         </div>
     </div>
 
@@ -396,105 +551,147 @@
         </header>
 
         <main>
-        <div class="container">
-            <div class="subtitle">Next Generation Hodler</div>
-            <h1>NPJOA 어서오세요</h1>
-            <p class="description">세상 변화를 추적하고 기록하며 기다릴 줄 아는<br>기업 중심 장기 투자를 지향합니다.</p>
-            <div class="btn-group">
-                <a href="https://x.com/NPjoa_Hodl" target="_blank" class="btn">트위터 바로가기</a>
-                <a href="https://www.youtube.com/@NPjoa" target="_blank" class="btn">유튜브 바로가기</a>
-                <a href="https://blog.naver.com/npjoa" target="_blank" class="btn">블로그 바로가기</a>
-            </div>
-        </div>
-
-
-        <div class="container" style="animation-delay: 0.2s;">
-            <div class="subtitle">Data Analysis Frontier</div>
-            <h1>팔란티어</h1>
-            <p class="description">데이터로 세상을 혁신하는 인프라를 추적합니다.</p>
-
-            <div class="section-title">Corporate & Development</div>
-            <div class="btn-group">
-                <a href="https://www.linkedin.com/company/palantir-technologies/posts/?feedView=all" target="_blank" class="btn btn-sm">링크드인</a>
-                <a href="https://www.palantir.com/docs/foundry/announcements" target="_blank" class="btn btn-sm">개발자 업데이트</a>
-                <a href="https://jobs.lever.co/palantir" target="_blank" class="btn btn-sm">채용/직무</a>
-                <a href="https://ontologize.com/" target="_blank" class="btn btn-sm">채용(Onto)</a>
-                <a href="https://ppubs.uspto.gov/pubwebapp/" target="_blank" class="btn btn-sm">특허-USPTO</a>
-                <a href="https://patentscope.wipo.int/search/en/search.jsf" target="_blank" class="btn btn-sm">특허-WIPO</a>
+            <div class="container">
+                <div class="subtitle">Next Generation Hodler</div>
+                <h1>NPJOA 어서오세요</h1>
+                <p class="description">세상 변화를 추적하고 기록하며 기다릴 줄 아는<br>기업 중심 장기 투자를 지향합니다.</p>
+                <div class="btn-group">
+                    <a href="https://x.com/NPjoa_Hodl" target="_blank" class="btn">트위터 바로가기</a>
+                    <a href="https://www.youtube.com/@NPjoa" target="_blank" class="btn">유튜브 바로가기</a>
+                    <a href="https://blog.naver.com/npjoa" target="_blank" class="btn">블로그 바로가기</a>
+                </div>
             </div>
 
-            <div class="section-title">Government Contracts</div>
-            <div class="btn-group">
-                <a href="https://sam.gov/contracting" target="_blank" class="btn btn-sm">미 정부계약(SAM)</a>
-                <a href="https://www.usaspending.gov/search?hash=f8b9b388928507227bca48f07e7dabe7" target="_blank" class="btn btn-sm">정부수상(US)</a>
-                <a href="https://www.war.gov/News/Contracts/Search/palantir/" target="_blank" class="btn btn-sm">국방부 계약</a>
-                <a href="https://www.tenders.gov.au/Search/KeywordSearch?Keyword=PALANTIR&submitSort=Go&OrderBy=Publish+Date&sort=" target="_blank" class="btn btn-sm">호주 정부계약</a>
+
+            <div class="container" style="animation-delay: 0.2s;">
+                <div class="subtitle">Data Analysis Frontier</div>
+                <h1>팔란티어</h1>
+                <p class="description">데이터로 세상을 혁신하는 인프라를 추적합니다.</p>
+
+                <div class="section-title">Corporate & Development</div>
+                <div class="btn-group">
+                    <a href="https://www.linkedin.com/company/palantir-technologies/posts/?feedView=all" target="_blank"
+                        class="btn btn-sm">링크드인</a>
+                    <a href="https://www.palantir.com/docs/foundry/announcements" target="_blank" class="btn btn-sm">개발자
+                        업데이트</a>
+                    <a href="https://jobs.lever.co/palantir" target="_blank" class="btn btn-sm">채용/직무</a>
+                    <a href="https://ontologize.com/" target="_blank" class="btn btn-sm">채용(Onto)</a>
+                    <a href="https://ppubs.uspto.gov/pubwebapp/" target="_blank" class="btn btn-sm">특허-USPTO</a>
+                    <a href="https://patentscope.wipo.int/search/en/search.jsf" target="_blank"
+                        class="btn btn-sm">특허-WIPO</a>
+                </div>
+
+                <div class="section-title">Government Contracts</div>
+                <div class="btn-group">
+                    <a href="https://sam.gov/contracting" target="_blank" class="btn btn-sm">미 정부계약(SAM)</a>
+                    <a href="https://www.usaspending.gov/search?hash=f8b9b388928507227bca48f07e7dabe7" target="_blank"
+                        class="btn btn-sm">정부수상(US)</a>
+                    <a href="https://www.war.gov/News/Contracts/Search/palantir/" target="_blank" class="btn btn-sm">국방부
+                        계약</a>
+                    <a href="https://www.tenders.gov.au/Search/KeywordSearch?Keyword=PALANTIR&submitSort=Go&OrderBy=Publish+Date&sort="
+                        target="_blank" class="btn btn-sm">호주 정부계약</a>
+                </div>
+
+                <div class="section-title">Investment Analysis</div>
+                <div class="btn-group">
+                    <a href="https://fintel.io/so/us/pltr" target="_blank" class="btn btn-sm">기관투자 현황</a>
+                    <a href="https://www.quiverquant.com/lobbying/stock/PLTR/" target="_blank" class="btn btn-sm">내부자/로비
+                        현황</a>
+                </div>
+
+                <div class="section-title">Community</div>
+                <div class="btn-group">
+                    <a href="https://www.tossinvest.com/stocks/US20200930014/community" target="_blank"
+                        class="btn btn-sm">토스 커뮤니티</a>
+                    <a href="https://x.com/i/communities/1528936803902066688" target="_blank" class="btn btn-sm">X(트위터)
+                        커뮤니티</a>
+                    <a href="https://cafe.naver.com/bluegrayqzhkl" target="_blank" class="btn btn-sm">팔란티어 카페</a>
+                </div>
             </div>
 
-            <div class="section-title">Investment Analysis</div>
-            <div class="btn-group">
-                <a href="https://fintel.io/so/us/pltr" target="_blank" class="btn btn-sm">기관투자 현황</a>
-                <a href="https://www.quiverquant.com/lobbying/stock/PLTR/" target="_blank" class="btn btn-sm">내부자/로비 현황</a>
+            <div class="container" style="animation-delay: 0.4s;">
+                <div class="subtitle">Corporate Collaboration</div>
+                <h1>로킷헬스케어</h1>
+                <p class="description">우리 삶을 혁신하는 기술과 비전을 공유합니다.</p>
+
+                <div class="section-title">Leadership SNS</div>
+                <div class="btn-group">
+                    <a href="https://www.instagram.com/steveshyou/" target="_blank" class="btn btn-sm">인스타그램</a>
+                    <a href="https://www.facebook.com/shbrave?locale=ko_KR" target="_blank" class="btn btn-sm">페이스북</a>
+                    <a href="https://www.threads.com/@steveshyou" target="_blank" class="btn btn-sm">스레드</a>
+                </div>
+
+                <div class="section-title">info & Community</div>
+                <div class="btn-group">
+                    <a href="https://www.saramin.co.kr/zf_user/company-info/view-inner-recruit?csn=cE9kdTJJbTYrUGprZkQyUDhNajFIZz09"
+                        target="_blank" class="btn btn-sm">채용공고</a>
+                    <a href="https://m.cafe.naver.com/ca-fe/rokithealthcare?tc=article" target="_blank"
+                        class="btn btn-sm">로킷 카페</a>
+                    <a href="https://x.com/i/communities/2005535431115641285" target="_blank" class="btn btn-sm">로킷 트위터
+                        커뮤니티</a>
+                    <a href="https://www.tossinvest.com/stocks/A376900/community?symbol-or-stock-code=A376900"
+                        target="_blank" class="btn btn-sm">로킷 토스 커뮤니티</a>
+                </div>
             </div>
 
-            <div class="section-title">Community</div>
-            <div class="btn-group">
-                <a href="https://www.tossinvest.com/stocks/US20200930014/community" target="_blank" class="btn btn-sm">토스 커뮤니티</a>
-                <a href="https://x.com/i/communities/1528936803902066688" target="_blank" class="btn btn-sm">X(트위터) 커뮤니티</a>
-                <a href="https://cafe.naver.com/bluegrayqzhkl" target="_blank" class="btn btn-sm">팔란티어 카페</a>
-            </div>
-        </div>
+            <div class="container" style="animation-delay: 0.6s;">
+                <div class="subtitle">Investment Insights</div>
+                <h1>리서치</h1>
+                <p class="description">깊이 있는 분석과 기록을 통해<br>투자의 본질을 탐구합니다.</p>
+                <div class="section-title">Corporate Research</div>
+                <div class="btn-group">
+                    <a href="https://companiesmarketcap.com/xometry/ps-ratio/" target="_blank"
+                        class="btn btn-sm">PER/PSR 밸류</a>
+                    <a href="https://vizualstocks.com/premium/home" target="_blank" class="btn btn-sm">시각화</a>
+                    <button onclick="openResearchPreview()" class="btn btn-sm" style="background: rgba(0, 255, 127, 0.15); border: 1px solid rgba(0, 255, 127, 0.4); color: #00ff7f;">리서치 요약 미리보기</button>
+                </div>
 
-        <div class="container" style="animation-delay: 0.4s;">
-            <div class="subtitle">Corporate Collaboration</div>
-            <h1>로킷헬스케어</h1>
-            <p class="description">우리 삶을 혁신하는 기술과 비전을 공유합니다.</p>
-            
-            <div class="section-title">Leadership SNS</div>
-            <div class="btn-group">
-                <a href="https://www.instagram.com/steveshyou/" target="_blank" class="btn btn-sm">인스타그램</a>
-                <a href="https://www.facebook.com/shbrave?locale=ko_KR" target="_blank" class="btn btn-sm">페이스북</a>
-                <a href="https://www.threads.com/@steveshyou" target="_blank" class="btn btn-sm">스레드</a>
-            </div>
-
-            <div class="section-title">info & Community</div>
-            <div class="btn-group">
-                <a href="https://www.saramin.co.kr/zf_user/company-info/view-inner-recruit?csn=cE9kdTJJbTYrUGprZkQyUDhNajFIZz09" target="_blank" class="btn btn-sm">채용공고</a>
-                <a href="https://m.cafe.naver.com/ca-fe/rokithealthcare?tc=article" target="_blank" class="btn btn-sm">로킷 카페</a>
-                <a href="https://x.com/i/communities/2005535431115641285" target="_blank" class="btn btn-sm">로킷 트위터 커뮤니티</a>
-                <a href="https://www.tossinvest.com/stocks/A376900/community?symbol-or-stock-code=A376900" target="_blank" class="btn btn-sm">로킷 토스 커뮤니티</a>
-            </div>
-        </div>
-
-        <div class="container" style="animation-delay: 0.6s;">
-            <div class="subtitle">Investment Insights</div>
-            <h1>리서치</h1>
-            <p class="description">깊이 있는 분석과 기록을 통해<br>투자의 본질을 탐구합니다.</p>
-            <div class="section-title">Corporate Research</div>
-            <div class="btn-group">
-                <a href="https://companiesmarketcap.com/xometry/ps-ratio/" target="_blank" class="btn btn-sm">PER/PSR 밸류</a>
-                <a href="https://vizualstocks.com/premium/home" target="_blank" class="btn btn-sm">시각화</a>
-            </div>
-        </div>
-
-        <div class="container" style="animation-delay: 0.8s;">
-            <div class="subtitle">Manager's Log</div>
-            <h1>공지사항 로그</h1>
-            <p class="description">주인장의 실시간 인사이트와 공지사항을 기록합니다.</p>
-            
-            <div id="log-list" class="log-container">
-                <!-- 로그 아이템이 여기에 추가됨 -->
+                <div class="section-title">Market Indicators</div>
+                <div class="btn-group">
+                    <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank" class="btn btn-sm">증시 탐욕 지수</a>
+                    <a href="https://alternative.me/crypto/fear-and-greed-index/" target="_blank" class="btn btn-sm">크립토 탐욕 지수</a>
+                    <a href="https://kr.investing.com/" target="_blank" class="btn btn-sm">인베스팅닷컴</a>
+                </div>
             </div>
 
-            <div id="admin-editor">
-                <textarea id="log-input" rows="3" placeholder="기록할 내용을 입력하세요..."></textarea>
-                <button onclick="addLog()" class="btn btn-sm">글 남기기</button>
-            </div>
-        </div>
-    </main>
+            <div class="container" style="animation-delay: 0.8s;">
+                <div class="subtitle">Manager's Log</div>
+                <h1>공지사항 로그</h1>
+                <p class="description">주인장의 실시간 인사이트와 공지사항을 기록합니다.</p>
 
-    <div class="bottom-line"></div>
+                <div id="log-list" class="log-container">
+                    <!-- 로그 아이템이 여기에 추가됨 -->
+                </div>
+
+                <div id="admin-editor">
+                    <textarea id="log-input" rows="3" placeholder="기록할 내용을 입력하세요..."></textarea>
+                    <button onclick="addLog()" class="btn btn-sm">글 남기기</button>
+                </div>
+            </div>
+        </main>
+
+        <div class="bottom-line"></div>
     </div> <!-- main-content 닫기 -->
+
+    <!-- 미리보기 모달 레이어 -->
+    <div id="preview-overlay" class="preview-overlay" onclick="closePreview(event)">
+        <div class="preview-window" onclick="event.stopPropagation()">
+            <div class="preview-header">
+                <h2 id="preview-title">리서치 인사이트 미리보기</h2>
+                <button class="close-preview" onclick="closePreview()">✕</button>
+            </div>
+            <div class="preview-body">
+                <div id="preview-loader" class="loader-dots" style="display: none;">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div id="preview-content-area" class="preview-content">
+                    <!-- 미리보기 내용이 동적으로 삽입됨 -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         function checkPassword() {
@@ -541,7 +738,7 @@
 
             const now = new Date();
             const dateStr = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-            
+
             logs.unshift({
                 id: Date.now(),
                 date: dateStr,
@@ -562,7 +759,7 @@
             const list = document.getElementById('log-list');
             const authType = localStorage.getItem('auth_type');
             const isAdmin = authType === 'admin';
-            
+
             list.innerHTML = logs.map(log => `
                 <div class="log-item">
                     <div class="log-date">${log.date}</div>
@@ -572,8 +769,42 @@
             `).join('');
         }
 
+        // 미리보기 기능 스크립트
+        function openResearchPreview() {
+            const overlay = document.getElementById('preview-overlay');
+            const contentArea = document.getElementById('preview-content-area');
+            const loader = document.getElementById('preview-loader');
+            const title = document.getElementById('preview-title');
+
+            title.innerText = "로킷헬스케어 리서치 인사이트";
+            contentArea.innerHTML = "";
+            loader.style.display = "flex";
+            overlay.style.display = "flex";
+            setTimeout(() => overlay.classList.add('active'), 10);
+
+            // 가상의 데이터 로드 시뮬레이션
+            setTimeout(() => {
+                loader.style.display = "none";
+                contentArea.innerHTML = `
+                    <p style="margin-bottom: 20px;"><strong>[로킷헬스케어 실시간 주요 리서치 요약]</strong></p>
+                    <p style="margin-bottom: 15px;">1. <strong>625억원 규모 투자 유치:</strong> 해외 자본 450억원을 포함한 대규모 자금 확보로 글로벌 장기 복원 플랫폼 서비스 가속화가 기대됩니다.</p>
+                    <p style="margin-bottom: 15px;">2. <strong>글로벌 시장 진출:</strong> 이탈리아 공공병원 진입 및 미국 노스웰 헬스와의 피부·창상 재생 기술 협력 체결을 통해 당뇨발 재생 치료 분야의 글로벌 스탠다드를 주도하고 있습니다.</p>
+                    <p style="margin-bottom: 15px;">3. <strong>기술 확장성:</strong> 3D 바이오 프린팅 기반의 자가 세포 재생 기술은 연골, 신장 등 다양한 고형 장기 재생으로 파이프라인이 확장되고 있어 높은 성장 잠재력을 보유하고 있습니다.</p>
+                    <a href="rokit_research.html" class="preview-link">전체 리서치 대시보드 보기</a>
+                `;
+            }, 1200);
+        }
+
+        function closePreview(e) {
+            const overlay = document.getElementById('preview-overlay');
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 400);
+        }
+
         // 페이지 로드 시 스크롤 잠금 (비밀번호 입력 전)
-        window.onload = function() {
+        window.onload = function () {
             renderLogs(); // 로그 먼저 로드
             document.body.style.overflowY = 'hidden';
             document.getElementById('password-input').focus();
