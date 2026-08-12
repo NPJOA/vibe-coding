@@ -3,8 +3,7 @@ name: PLTR Institutional Holdings Bot
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 23 * * *"  # 08:00 KST
-    - cron: "0 11 * * *"  # 20:00 KST
+    - cron: "0 * * * *"  # every hour, on the hour
 
 permissions:
   contents: write
