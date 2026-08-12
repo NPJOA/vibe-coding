@@ -32,7 +32,7 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "pltr_institu
 FTS_URL = "https://efts.sec.gov/LATEST/search-index"
 SEC_HEADERS = {
     # SEC's fair-access policy asks for a descriptive User-Agent identifying the requester.
-    "User-Agent": "vibe-coding PLTR-13F-bot (github.com/NPJOA/vibe-coding)",
+    "User-Agent": "vibe-coding PLTR-13F-bot pltr-bot@example.com",
     "Accept-Encoding": "gzip, deflate",
 }
 LOOKBACK_DAYS = 3  # search window for newly filed 13F-HR filings
