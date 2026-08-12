@@ -1,10 +1,10 @@
-name: PLTR Daily Research Bot
+name: PLTR Hourly Research Bot
 
 on:
   workflow_dispatch: {}
   schedule:
-    # 10:00 UTC = 19:00 KST (Korea has no DST)
-    - cron: "0 10 * * *"
+    # every hour, on the hour
+    - cron: "0 * * * *"
 
 jobs:
   research-and-notify:
