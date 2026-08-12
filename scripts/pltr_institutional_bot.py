@@ -162,6 +162,10 @@ def main():
     end_date = now.strftime("%Y-%m-%d")
 
     hits = search_recent_13f_filings(start_date, end_date)
+    # Process oldest reporting quarter first so that same-day restatements of
+    # several past quarters (common with 13F-HR/A amendments) get compared in
+    # chronological order instead of whatever order the search API returned.
+    hits.sort(key=lambda h: h.get("_source", {}).get("period_ending", ""))
     new_items = []
 
     for hit in hits:
@@ -175,6 +179,7 @@ def main():
         accession_dashed, doc_name = accession_and_file.split(":", 1)
         accession_nodash = accession_dashed.replace("-", "")
         file_date = source.get("file_date", "")
+        period_ending = source.get("period_ending", "")
         display_names = source.get("display_names", [])
         investor = display_names[0] if display_names else f"CIK {cik}"
 
@@ -184,6 +189,13 @@ def main():
 
         dedupe_key = accession_nodash
         if dedupe_key in notified:
+            continue
+
+        previous = holders.get(cik)
+        if previous and period_ending and previous.get("period_ending", "") >= period_ending:
+            # A restatement of a quarter we already have a newer (or equal)
+            # data point for - not a real change, just historical bookkeeping.
+            notified.add(dedupe_key)
             continue
 
         doc_url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_nodash}/{doc_name}"
@@ -203,12 +215,16 @@ def main():
             print(f"Palantir not found in info table for CIK {cik} (accession {accession_nodash})")
             continue
 
-        previous = holders.get(cik)
         previous_shares = previous["shares"] if previous else 0.0
         status = classify(previous_shares, shares, previous is not None)
 
         notified.add(dedupe_key)
-        holders[cik] = {"shares": shares, "investor": investor, "date": file_date}
+        holders[cik] = {
+            "shares": shares,
+            "investor": investor,
+            "date": file_date,
+            "period_ending": period_ending,
+        }
 
         if status is None:
             continue
