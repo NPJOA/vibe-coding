@@ -1,68 +1,81 @@
 #!/usr/bin/env python3
-"""Daily Palantir (PLTR) news research bot -> Telegram.
+"""Daily Palantir (PLTR) news digest -> Telegram.
 
-Uses Claude's server-side web_search tool to gather the last 24 hours of
-Palantir-related news, tweets, and LinkedIn posts, then sends a summary to
-a Telegram chat.
+Pulls the last 24 hours of Palantir-related articles from Google News RSS
+(no paid API involved) and sends a formatted digest to a Telegram chat.
 
 Required environment variables:
-  ANTHROPIC_API_KEY   - Anthropic API key
   TELEGRAM_BOT_TOKEN  - Telegram bot token from BotFather
   TELEGRAM_CHAT_ID    - Target chat id (group or user)
 """
 import os
 import sys
-import textwrap
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 
-import anthropic
 import requests
 
-MODEL = "claude-sonnet-5"
+LOOKBACK_HOURS = 24
+MAX_ITEMS = 10
 
-RESEARCH_PROMPT = textwrap.dedent("""\
-    You are a financial news research assistant. Using web search, find the
-    most notable Palantir Technologies (PLTR) news, announcements, and
-    discussion from roughly the last 24 hours. Cover:
-    - Company news / press releases / SEC filings
-    - Stock-moving analyst notes or price action
-    - Notable posts on Twitter/X or LinkedIn that were indexed by search
-      (only include ones you can find a real, working source link for)
-
-    Only include items you found via search with a real source link - do not
-    invent items or links. If nothing new happened in the last 24 hours, say
-    so plainly instead of padding the summary.
-
-    Write the final summary in Korean, formatted as plain text suitable for
-    a Telegram message:
-    - Start with a one-line headline summary
-    - Then a bulleted list (using "- ") of up to 8 items, each with a short
-      description and the source URL on its own line
-    - No markdown bold/asterisks, no headers - plain text only, since this
-      is sent without markdown parsing
-    - Keep it concise and scannable
-""")
+QUERIES = [
+    ("en", "https://news.google.com/rss/search?q=Palantir+OR+PLTR+when:1d&hl=en-US&gl=US&ceid=US:en"),
+    ("ko", "https://news.google.com/rss/search?q=%ED%8C%94%EB%9E%80%ED%8B%B0%EC%96%B4&hl=ko&gl=KR&ceid=KR:ko"),
+]
 
 
-def research_pltr_news(api_key: str) -> str:
-    client = anthropic.Anthropic(api_key=api_key)
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=2000,
-        tools=[{
-            "type": "web_search_20250305",
-            "name": "web_search",
-            "max_uses": 8,
-        }],
-        messages=[{"role": "user", "content": RESEARCH_PROMPT}],
-    )
+def fetch_recent_articles():
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+    seen_links = set()
+    articles = []
 
-    text_parts = [block.text for block in response.content if block.type == "text"]
-    return "\n".join(text_parts).strip()
+    for _lang, url in QUERIES:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        root = ET.fromstring(resp.content)
+
+        for item in root.findall("./channel/item"):
+            title = (item.findtext("title") or "").strip()
+            link = (item.findtext("link") or "").strip()
+            pub_date_raw = item.findtext("pubDate")
+            if not title or not link or not pub_date_raw:
+                continue
+
+            try:
+                pub_date = parsedate_to_datetime(pub_date_raw)
+            except (TypeError, ValueError):
+                continue
+            if pub_date.tzinfo is None:
+                pub_date = pub_date.replace(tzinfo=timezone.utc)
+
+            if pub_date < cutoff:
+                continue
+            if link in seen_links:
+                continue
+            seen_links.add(link)
+
+            articles.append((pub_date, title, link))
+
+    articles.sort(key=lambda a: a[0], reverse=True)
+    return articles[:MAX_ITEMS]
+
+
+def build_message(articles) -> str:
+    header = "[PLTR 24H 뉴스 다이제스트]\n\n"
+    if not articles:
+        return header + "지난 24시간 동안 새로 올라온 팔란티어 관련 뉴스가 없습니다."
+
+    lines = [header.strip(), ""]
+    for pub_date, title, link in articles:
+        kst = pub_date.astimezone(timezone(timedelta(hours=9)))
+        lines.append(f"- {title} ({kst.strftime('%m/%d %H:%M')})")
+        lines.append(f"  {link}")
+    return "\n".join(lines)
 
 
 def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    # Telegram messages are capped at 4096 chars; split if needed.
     chunks = [text[i:i + 4000] for i in range(0, len(text), 4000)] or [text]
     for chunk in chunks:
         resp = requests.post(url, json={
@@ -74,12 +87,10 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str) -> None:
 
 
 def main() -> int:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
     missing = [name for name, val in [
-        ("ANTHROPIC_API_KEY", api_key),
         ("TELEGRAM_BOT_TOKEN", bot_token),
         ("TELEGRAM_CHAT_ID", chat_id),
     ] if not val]
@@ -87,13 +98,10 @@ def main() -> int:
         print(f"Missing required environment variables: {', '.join(missing)}", file=sys.stderr)
         return 1
 
-    summary = research_pltr_news(api_key)
-    if not summary:
-        summary = "팔란티어(PLTR) 리서치 결과가 비어있습니다. 스크립트 로그를 확인해주세요."
-
-    header = "[PLTR 24H 리서치]\n\n"
-    send_telegram_message(bot_token, chat_id, header + summary)
-    print("Sent Telegram message successfully.")
+    articles = fetch_recent_articles()
+    message = build_message(articles)
+    send_telegram_message(bot_token, chat_id, message)
+    print(f"Sent Telegram message with {len(articles)} article(s).")
     return 0
 
 
