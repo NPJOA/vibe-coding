@@ -1,0 +1,27 @@
+name: PLTR Weekly Market Calendar Bot
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 23 * * 0"  # Sunday 23:00 UTC = Monday 08:00 KST
+
+jobs:
+  send-calendar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run weekly calendar bot
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/pltr_weekly_calendar_bot.py
