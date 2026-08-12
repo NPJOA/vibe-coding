@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Daily Palantir (PLTR) news digest -> Telegram.
+"""Hourly Palantir (PLTR) news digest -> Telegram.
 
-Pulls the last 24 hours of Palantir-related articles from Google News RSS
-(no paid API involved) and sends a formatted digest to a Telegram chat.
+Pulls Palantir-related articles published in the last hour from Google
+News RSS (no paid API involved) and sends a formatted digest to a
+Telegram chat. Sends nothing when there's no new article.
 
 Required environment variables:
   TELEGRAM_BOT_TOKEN  - Telegram bot token from BotFather
@@ -16,13 +17,32 @@ from email.utils import parsedate_to_datetime
 
 import requests
 
-LOOKBACK_HOURS = 24
+LOOKBACK_HOURS = 1
 MAX_ITEMS = 10
 
 QUERIES = [
-    ("en", "https://news.google.com/rss/search?q=Palantir+OR+PLTR+when:1d&hl=en-US&gl=US&ceid=US:en"),
-    ("ko", "https://news.google.com/rss/search?q=%ED%8C%94%EB%9E%80%ED%8B%B0%EC%96%B4&hl=ko&gl=KR&ceid=KR:ko"),
+    ("en", "https://news.google.com/rss/search?q=Palantir+OR+PLTR+when:1h&hl=en-US&gl=US&ceid=US:en"),
+    ("ko", "https://news.google.com/rss/search?q=%ED%8C%94%EB%9E%80%ED%8B%B0%EC%96%B4+when:1h&hl=ko&gl=KR&ceid=KR:ko"),
 ]
+
+
+def translate_to_korean(text: str) -> str:
+    """Best-effort translation via Google Translate's public endpoint.
+
+    Falls back to the original text if the request fails - translation is
+    a nice-to-have, not something that should break the digest.
+    """
+    try:
+        resp = requests.get(
+            "https://translate.googleapis.com/translate_a/single",
+            params={"client": "gtx", "sl": "auto", "tl": "ko", "dt": "t", "q": text},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return "".join(chunk[0] for chunk in data[0])
+    except (requests.RequestException, ValueError, KeyError, IndexError):
+        return text
 
 
 def fetch_recent_articles():
@@ -30,7 +50,7 @@ def fetch_recent_articles():
     seen_links = set()
     articles = []
 
-    for _lang, url in QUERIES:
+    for lang, url in QUERIES:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
         root = ET.fromstring(resp.content)
@@ -55,6 +75,9 @@ def fetch_recent_articles():
                 continue
             seen_links.add(link)
 
+            if lang == "en":
+                title = translate_to_korean(title)
+
             articles.append((pub_date, title, link))
 
     articles.sort(key=lambda a: a[0], reverse=True)
@@ -62,11 +85,7 @@ def fetch_recent_articles():
 
 
 def build_message(articles) -> str:
-    header = "[PLTR 24H 뉴스 다이제스트]\n\n"
-    if not articles:
-        return header + "지난 24시간 동안 새로 올라온 팔란티어 관련 뉴스가 없습니다."
-
-    lines = [header.strip(), ""]
+    lines = ["[PLTR 1H 뉴스 업데이트]", ""]
     for pub_date, title, link in articles:
         kst = pub_date.astimezone(timezone(timedelta(hours=9)))
         lines.append(f"- {title} ({kst.strftime('%m/%d %H:%M')})")
@@ -99,6 +118,10 @@ def main() -> int:
         return 1
 
     articles = fetch_recent_articles()
+    if not articles:
+        print("No new PLTR articles in the last hour; skipping Telegram send.")
+        return 0
+
     message = build_message(articles)
     send_telegram_message(bot_token, chat_id, message)
     print(f"Sent Telegram message with {len(articles)} article(s).")
