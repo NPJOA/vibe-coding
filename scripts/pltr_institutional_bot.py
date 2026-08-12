@@ -57,44 +57,35 @@ def strip_ns(tag):
 
 
 def search_recent_13f_filings(start_date, end_date):
-    params = {
-        "q": "\"Palantir Technologies\"",
-        "forms": "13F-HR,13F-HR/A",
-        "startdt": start_date,
-        "enddt": end_date,
-    }
-    resp = requests.get(FTS_URL, params=params, headers=SEC_HEADERS, timeout=30)
-    print(f"EDGAR full text search: HTTP {resp.status_code} for {params}")
-    if resp.status_code != 200:
-        print(resp.text[:1000], file=sys.stderr)
-    resp.raise_for_status()
-    data = resp.json()
-    hits = data.get("hits", {}).get("hits", [])
-    print(f"Full text search returned {len(hits)} hit(s)")
-    return hits
+    all_hits = []
+    offset = 0
+    page_size = 10
 
+    while True:
+        params = {
+            "q": "\"Palantir Technologies\"",
+            "forms": "13F-HR,13F-HR/A",
+            "startdt": start_date,
+            "enddt": end_date,
+            "from": offset,
+        }
+        resp = requests.get(FTS_URL, params=params, headers=SEC_HEADERS, timeout=30)
+        print(f"EDGAR full text search: HTTP {resp.status_code} for {params}")
+        if resp.status_code != 200:
+            print(resp.text[:1000], file=sys.stderr)
+        resp.raise_for_status()
+        data = resp.json()
+        hits = data.get("hits", {}).get("hits", [])
+        total = data.get("hits", {}).get("total", {}).get("value", len(hits))
+        all_hits.extend(hits)
 
-def get_filing_index(cik, accession_nodash):
-    url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_nodash}/index.json"
-    resp = requests.get(url, headers=SEC_HEADERS, timeout=30)
-    if resp.status_code != 200:
-        print(f"Filing index fetch failed ({resp.status_code}): {url}")
-        return None
-    return resp.json()
+        offset += page_size
+        if offset >= total or not hits:
+            break
+        time.sleep(REQUEST_DELAY)
 
-
-def find_infotable_doc(index_json):
-    items = index_json.get("directory", {}).get("item", [])
-    candidates = [
-        item for item in items
-        if item.get("name", "").lower().endswith(".xml") and "info" in item.get("name", "").lower()
-    ]
-    if not candidates:
-        return None
-    # The info table is a data dump (usually the largest XML in the filing);
-    # the cover page (primary_doc.xml) is comparatively small.
-    candidates.sort(key=lambda i: int(i.get("size", 0) or 0), reverse=True)
-    return candidates[0]["name"]
+    print(f"Full text search returned {len(all_hits)} hit(s)")
+    return all_hits
 
 
 def parse_infotable_for_palantir(xml_bytes):
@@ -175,30 +166,24 @@ def main():
 
     for hit in hits:
         source = hit.get("_source", {})
-        cik_raw = source.get("cik", "")
-        cik = str(cik_raw).split(",")[0].strip() if cik_raw else None
+        cik_list = source.get("ciks", [])
+        cik = cik_list[0] if cik_list else None
         accession_and_file = hit.get("_id", "")
-        accession_nodash = accession_and_file.split(":")[0].replace("-", "") if accession_and_file else None
+        if ":" not in accession_and_file:
+            print(f"Skipping hit with unexpected _id format: {hit}")
+            continue
+        accession_dashed, doc_name = accession_and_file.split(":", 1)
+        accession_nodash = accession_dashed.replace("-", "")
         file_date = source.get("file_date", "")
         display_names = source.get("display_names", [])
         investor = display_names[0] if display_names else f"CIK {cik}"
 
-        if not cik or not accession_nodash:
-            print(f"Skipping hit with missing cik/accession: {hit}")
+        if not cik or not accession_nodash or not doc_name:
+            print(f"Skipping hit with missing cik/accession/doc: {hit}")
             continue
 
         dedupe_key = accession_nodash
         if dedupe_key in notified:
-            continue
-
-        time.sleep(REQUEST_DELAY)
-        index_json = get_filing_index(cik, accession_nodash)
-        if not index_json:
-            continue
-
-        doc_name = find_infotable_doc(index_json)
-        if not doc_name:
-            print(f"No info table document found for CIK {cik} accession {accession_nodash}")
             continue
 
         doc_url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_nodash}/{doc_name}"
