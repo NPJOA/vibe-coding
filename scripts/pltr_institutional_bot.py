@@ -125,12 +125,13 @@ def classify(previous_shares, current_shares, previously_known):
     return None  # unchanged
 
 
-def build_message(items):
-    lines = ["[PLTR 기관 보유 변동 (SEC 13F)]", ""]
-    for entry in items:
-        shares_text = f"{int(entry['shares']):,}주"
-        lines.append(f"- {entry['investor']}: {entry['status']} - {shares_text} [{entry['date']}]")
-    return "\n".join(lines)
+def build_item_message(entry):
+    shares_text = f"{int(entry['shares']):,}주"
+    return (
+        f"[PLTR 기관 보유 변동]\n"
+        f"{entry['investor']}: {entry['status']} - {shares_text} [{entry['date']}]\n"
+        f"출처: {entry['source_url']}"
+    )
 
 
 def send_telegram_message(bot_token, chat_id, text):
@@ -229,11 +230,13 @@ def main():
         if status is None:
             continue
 
+        source_url = f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession_nodash}/{accession_dashed}-index.htm"
         new_items.append({
             "investor": investor,
             "status": status,
             "shares": shares,
             "date": file_date,
+            "source_url": source_url,
         })
 
     state["notified"] = list(notified)[-3000:]
@@ -244,9 +247,11 @@ def main():
         print("No new PLTR institutional ownership changes found.")
         return 0
 
-    message = build_message(new_items)
-    send_telegram_message(bot_token, chat_id, message)
-    print(f"Sent Telegram message with {len(new_items)} item(s).")
+    for entry in new_items:
+        send_telegram_message(bot_token, chat_id, build_item_message(entry))
+        time.sleep(REQUEST_DELAY)
+
+    print(f"Sent {len(new_items)} individual Telegram message(s).")
     return 0
 
 
