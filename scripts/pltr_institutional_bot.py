@@ -24,7 +24,15 @@ STATE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "pltr_institu
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.google.com/",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "cross-site",
+    "Upgrade-Insecure-Requests": "1",
+    "Connection": "keep-alive",
 }
 LOOKBACK_DAYS = 2  # covers overnight gap between the 8pm and next 8am run
 
@@ -54,6 +62,8 @@ def parse_number(text):
 
 def fetch_rows():
     resp = requests.get(FINTEL_URL, headers=HEADERS, timeout=30)
+    if resp.status_code != 200:
+        print(f"fintel.io returned HTTP {resp.status_code}. Body preview:\n{resp.text[:1000]}", file=sys.stderr)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
