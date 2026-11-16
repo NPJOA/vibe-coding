@@ -1,3 +1,8 @@
+> **이전됨** (2026-11-16 KST, 코딩장). 아래 파일은 NPJOA/seggulmat-blog-automation 으로 옮겼습니다. 이 사본은 참고용으로만 두며 갱신하지 마세요.
+> `blog/affiliate/README.md` → `제휴/README.md` · `blog/affiliate/links.csv` → `제휴/links.csv`
+> `blog/style/README.md` → `참고자료/엔팔좋아-문체/README.md` · `blog/style/STYLE_GUIDE.md` → `참고자료/엔팔좋아-문체/STYLE_GUIDE.md` · `blog/style/examples.md` → `참고자료/엔팔좋아-문체/examples.md`
+> 새 저장소의 문체 가이드는 엔팔좋아 투자 블로그 참고용이며 세꿀맛 글에는 적용하지 않습니다. 전체 안내는 `blog/MOVED.md`.
+
 # 세꿀맛 제휴 마케팅 기준 (링크장인)
 
 담당: 제휴 마케팅 : 링크장인 / 보고: 총 감독 : 블로그 자동화
